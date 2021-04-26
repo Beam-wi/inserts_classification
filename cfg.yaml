@@ -1,0 +1,30 @@
+# dataset
+train_data_dir: '../datasets/inserts_cls_112_176/train'
+val_data_dir: '../datasets/inserts_cls_112_176/val'
+test_data_dir: '../datasets/inserts_cls_112_176/test'
+
+# objects
+image_size: [192, 192]
+crop_ratio: 0.9
+
+
+# optimizer
+lr: 0.01
+lr_milestones: [50, 80]
+warmup_epochs: 10
+total_epochs: 100
+
+batch_size: 32
+
+# log
+print_freq: 10
+save_freq: 20
+
+# save model
+checkpoints_dir: 'checkpoints/1123'
+
+# 
+imagenet_default_mean: [0.485, 0.456, 0.406]
+imagenet_default_std: [0.229, 0.224, 0.225]
+
+
