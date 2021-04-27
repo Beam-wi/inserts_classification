@@ -13,7 +13,7 @@ if __name__ == '__main__':
         cfg = yaml.load(fd, Loader=yaml.FullLoader)
     print(cfg)
 
-    dataset = Dataset(cfg['train_data_dir'], cfg['image_size'], cfg['crop_ratio'], phase='train')
+    dataset = Dataset(cfg['train_data_dir'], cfg['image_size'], cfg['class_names'], phase='test')
     trainloader = torch.utils.data.DataLoader(dataset, batch_size=1)
 
     for i, (data, label) in enumerate(trainloader):

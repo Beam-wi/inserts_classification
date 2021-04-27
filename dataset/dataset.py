@@ -16,19 +16,22 @@ from utils import letterbox_image_pil, letterbox_image_cv
 
 class Dataset(data.Dataset):
 
-    def __init__(self, data_dir, input_size, crop_ratio, phase='train'):
+    def __init__(self, data_dir, input_size, class_names, phase='train'):
         self.data_dir = data_dir
         self.phase = phase
         self.input_size = np.array(input_size)
-        self.crop_ratio = crop_ratio
+        self.crop_ratio = 0.9
         self.enlarge_size = (self.input_size / self.crop_ratio).astype(np.int)
 
-        self.cls_names = os.listdir(self.data_dir)
+        self.cls_names = class_names
 
         self.category_id_to_name = {k: v for k, v in enumerate(self.cls_names)}
         self.category_name_to_id = {v: k for k, v in self.category_id_to_name.items()}
 
         self.data_list = make_data_list_from_dir(self.data_dir, self.category_name_to_id)
+
+        if self.phase == 'train':
+            self.sample_weight = make_weights_for_balanced_classes(self.data_list, len(self.cls_names))
 
         print(self.cls_names)
         print(f'input size:{self.input_size}, enlarg size:{self.enlarge_size}')
@@ -75,14 +78,18 @@ class Dataset(data.Dataset):
 
 
 def make_data_list_from_dir(data_dir, category_name_to_id):
-    class_names = os.listdir(data_dir)
+    dir_names = os.listdir(data_dir)
     data_list = []
-    for cls_name in class_names:
-        sub_dir = os.path.join(data_dir, cls_name)
+    for dir_name in dir_names:
+        if not dir_name in category_name_to_id.keys():
+            continue
+        sub_dir = os.path.join(data_dir, dir_name)
         files = os.listdir(sub_dir)
         for each_file in files:
+            if os.path.splitext(each_file)[-1] not in ['.jpg', '.jpeg']:
+                continue
             img_path = os.path.join(sub_dir, each_file)
-            cls_id = category_name_to_id[cls_name]
+            cls_id = category_name_to_id[dir_name]
             data_list.append([img_path, cls_id])
     return data_list
     
@@ -91,7 +98,7 @@ def make_weights_for_balanced_classes(images, nclasses):
     count = [0] * nclasses                                                      
     for item in images:                                                         
         count[item[1]] += 1                                                     
-    weight_per_class = [0.] * nclasses                                      
+    weight_per_class = [0.] * nclasses
     N = float(sum(count))                                                   
     for i in range(nclasses):                                                   
         weight_per_class[i] = N/float(count[i])                                 
